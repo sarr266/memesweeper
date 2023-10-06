@@ -1,6 +1,7 @@
 #include "MemeField.h"
 #include <assert.h>
 #include <random>
+#include "SpriteCodex.h"
 
 void MemeField::Tile::SpawnMeme()
 {
@@ -11,6 +12,30 @@ void MemeField::Tile::SpawnMeme()
 bool MemeField::Tile::HasMeme() const
 {
 	return hasMeme;
+}
+
+void MemeField::Tile::Draw(const Vei2& screenPos, Graphics& gfx) const
+{
+	switch (state)
+	{
+	case State::Hidden:
+		SpriteCodex::DrawTileButton(screenPos, gfx);
+		break;
+	case State::Flagged:
+		SpriteCodex::DrawTileButton(screenPos, gfx);
+		SpriteCodex::DrawTileFlag(screenPos, gfx);
+		break;
+	case State::Revealed:
+		if (!HasMeme())
+		{
+			SpriteCodex::DrawTile0(screenPos, gfx);
+		}
+		else
+		{
+			SpriteCodex::DrawTileBomb(screenPos, gfx);
+		}
+		break;
+	}
 }
 
 MemeField::MemeField(int nMemes)
@@ -33,7 +58,23 @@ MemeField::MemeField(int nMemes)
 	}
 }
 
+void MemeField::Draw(Graphics& gfx) const //const function, const TileAt version called
+{
+	for (Vei2 gridPos = {0,0}; gridPos.y < height; gridPos.y++)
+	{
+		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
+		{
+			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize, gfx);
+		}
+	}
+}
+
 MemeField::Tile& MemeField::TileAt(const Vei2& gridPos)
+{
+	return field[gridPos.y * width + gridPos.x];
+}
+
+const MemeField::Tile& MemeField::TileAt(const Vei2& gridPos) const
 {
 	return field[gridPos.y * width + gridPos.x];
 }
