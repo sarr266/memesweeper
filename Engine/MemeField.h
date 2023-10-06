@@ -18,6 +18,8 @@ private:
 		void SpawnMeme();
 		bool HasMeme() const;
 		void Draw(const Vei2& screenPos, Graphics& gfx) const; //position on screen in pixels, to draw Tiles
+		void Reveal();
+		bool isRevealed() const;
 	private:
 		State state = State::Hidden;
 		bool hasMeme = false;

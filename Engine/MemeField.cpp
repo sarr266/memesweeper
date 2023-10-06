@@ -38,6 +38,17 @@ void MemeField::Tile::Draw(const Vei2& screenPos, Graphics& gfx) const
 	}
 }
 
+void MemeField::Tile::Reveal()
+{
+	assert(state == State::Hidden);
+	state = State::Revealed;
+}
+
+bool MemeField::Tile::isRevealed() const
+{
+	return state == State::Revealed;
+}
+
 MemeField::MemeField(int nMemes)
 {
 	assert(nMemes > 0 && nMemes < width * height);
