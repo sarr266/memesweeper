@@ -49,6 +49,20 @@ bool MemeField::Tile::isRevealed() const
 	return state == State::Revealed;
 }
 
+void MemeField::Tile::ToggleFlag()
+{
+	assert(!isRevealed());
+	if (state == State::Hidden)
+	{
+		state = State::Flagged;
+	}
+}
+
+bool MemeField::Tile::isFlagged() const
+{
+	return state == State::Flagged;
+}
+
 MemeField::MemeField(int nMemes)
 {
 	assert(nMemes > 0 && nMemes < width * height);
@@ -66,17 +80,55 @@ MemeField::MemeField(int nMemes)
 		} while (TileAt(spawnPos).HasMeme());
 
 		TileAt(spawnPos).SpawnMeme();
+
+		//reveal test
+		for (int i = 0; i < 10; i++)
+		{
+			const Vei2 gridpos = { xDist(rng), yDist(rng) };
+			if (!TileAt(gridpos).isRevealed())
+			{
+				TileAt(gridpos).Reveal();
+			}
+		}
 	}
 }
 
 void MemeField::Draw(Graphics& gfx) const //const function, const TileAt version called
 {
+	gfx.DrawRect(GetRect(), SpriteCodex::baseColor);
 	for (Vei2 gridPos = {0,0}; gridPos.y < height; gridPos.y++)
 	{
 		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
 		{
 			TileAt(gridPos).Draw(gridPos * SpriteCodex::tileSize, gfx);
 		}
+	}
+}
+
+RectI MemeField::GetRect() const
+{
+	return RectI(0, width*SpriteCodex::tileSize, 0, height*SpriteCodex::tileSize);
+}
+
+void MemeField::OnRevealClick(const Vei2& screenPos)
+{
+	const Vei2 gridPos = ScreenToGrid(screenPos);
+	assert(gridPos.x >= 0 && gridPos.x < width&& gridPos.y >= 0 && gridPos.y < height);
+	Tile& tile = TileAt(gridPos);
+	if (!tile.isRevealed() && !tile.isFlagged())
+	{
+		tile.Reveal();
+	}
+}
+
+void MemeField::OnFlagClick(const Vei2& screenPos)
+{
+	const Vei2 gridPos = ScreenToGrid(screenPos);
+	assert(gridPos.x >= 0 && gridPos.x < width&& gridPos.y >= 0 && gridPos.y < height);
+	Tile& tile = TileAt(gridPos);
+	if (!tile.isFlagged())
+	{
+		tile.ToggleFlag();
 	}
 }
 
@@ -88,4 +140,9 @@ MemeField::Tile& MemeField::TileAt(const Vei2& gridPos)
 const MemeField::Tile& MemeField::TileAt(const Vei2& gridPos) const
 {
 	return field[gridPos.y * width + gridPos.x];
+}
+
+Vei2 MemeField::ScreenToGrid(const Vei2& screenPos)
+{
+	return screenPos/SpriteCodex::tileSize;
 }
