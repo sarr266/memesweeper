@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <random>
 #include "SpriteCodex.h"
+#include <algorithm>
 
 void MemeField::Tile::SpawnMeme()
 {
@@ -28,7 +29,7 @@ void MemeField::Tile::Draw(const Vei2& screenPos, Graphics& gfx) const
 	case State::Revealed:
 		if (!HasMeme())
 		{
-			SpriteCodex::DrawTile0(screenPos, gfx);
+			SpriteCodex::DrawTileNumber(screenPos, nNeighborMemes, gfx);
 		}
 		else
 		{
@@ -56,11 +57,21 @@ void MemeField::Tile::ToggleFlag()
 	{
 		state = State::Flagged;
 	}
+	else
+	{
+		state = State::Hidden;
+	}
 }
 
 bool MemeField::Tile::isFlagged() const
 {
 	return state == State::Flagged;
+}
+
+void MemeField::Tile::SetNeighborMemeCount(int memeCount)
+{
+	assert(nNeighborMemes == -1); //we should only be able to assign a value when it's uninitialized
+	nNeighborMemes = memeCount;
 }
 
 MemeField::MemeField(int nMemes)
@@ -80,15 +91,13 @@ MemeField::MemeField(int nMemes)
 		} while (TileAt(spawnPos).HasMeme());
 
 		TileAt(spawnPos).SpawnMeme();
+	}
 
-		//reveal test
-		for (int i = 0; i < 10; i++)
+	for (Vei2 gridPos = { 0,0 }; gridPos.y < height; gridPos.y++)
+	{
+		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
 		{
-			const Vei2 gridpos = { xDist(rng), yDist(rng) };
-			if (!TileAt(gridpos).isRevealed())
-			{
-				TileAt(gridpos).Reveal();
-			}
+			TileAt(gridPos).SetNeighborMemeCount(CountNeighborMemes(gridPos));
 		}
 	}
 }
@@ -130,6 +139,27 @@ void MemeField::OnFlagClick(const Vei2& screenPos)
 	{
 		tile.ToggleFlag();
 	}
+}
+
+int MemeField::CountNeighborMemes(const Vei2& gridPos)
+{
+	const int xStart = std::max(0, gridPos.x - 1);
+	const int yStart = std::max(0, gridPos.y - 1);
+	const int xEnd = std::min(width - 1, gridPos.x + 1);
+	const int yEnd = std::min(height - 1, gridPos.y + 1);
+
+	int count = 0;
+	for (Vei2 gridPos = { xStart,yStart }; gridPos.y <= yEnd; gridPos.y++)
+	{
+		for (gridPos.x = xStart; gridPos.x <= xEnd; gridPos.x++)
+		{
+			if (TileAt(gridPos).HasMeme())
+			{
+				count++;
+			}
+		}
+	}
+	return count;
 }
 
 MemeField::Tile& MemeField::TileAt(const Vei2& gridPos)
