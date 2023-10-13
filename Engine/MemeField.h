@@ -17,7 +17,7 @@ private:
 	public:
 		void SpawnMeme();
 		bool HasMeme() const;
-		void Draw(const Vei2& screenPos, Graphics& gfx) const; //position on screen in pixels, to draw Tiles
+		void Draw(const Vei2& screenPos, bool isGameOver, Graphics& gfx) const; //position on screen in pixels, to draw Tiles
 		void Reveal();
 		bool isRevealed() const;
 		void ToggleFlag();
@@ -43,4 +43,5 @@ private:
 	static constexpr int width = 20;
 	static constexpr int height = 16;
 	Tile field[width * height];
+	bool isGameOver = false;
 };
