@@ -29,7 +29,7 @@ private:
 		int nNeighborMemes = -1; //-1 indicates that the variable has not been assigned any value
 	};
 public:
-	MemeField(int nMemes);
+	MemeField(const Vei2& center, int nMemes);
 	void Draw(Graphics& gfx) const; //to Draw rhe grid (grid consists of tiles so we'll have to call Tile::Draw)
 	RectI GetRect() const;
 	void OnRevealClick(const Vei2& screenPos);
@@ -42,6 +42,7 @@ private:
 private:
 	static constexpr int width = 20;
 	static constexpr int height = 16;
+	Vei2 topLeft;
 	Tile field[width * height];
 	bool isGameOver = false;
 };
