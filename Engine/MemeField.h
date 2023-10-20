@@ -44,5 +44,7 @@ private:
 	static constexpr int height = 16;
 	Vei2 topLeft;
 	Tile field[width * height];
+	static constexpr int borderThickness = 10;
+	static constexpr Color borderColor = Colors::White;
 	bool isGameOver = false;
 };
