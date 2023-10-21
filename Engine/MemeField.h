@@ -35,13 +35,14 @@ public:
 	void OnRevealClick(const Vei2& screenPos);
 	void OnFlagClick(const Vei2& screenPos);
 	int CountNeighborMemes(const Vei2& gridPos);
+	bool GameIsWon() const;
 private:
 	Tile& TileAt(const Vei2& gridPos); //position in tiles, called in non-const context
 	const Tile& TileAt(const Vei2& gridPos) const; //for const tilemaps, called in const context
 	Vei2 ScreenToGrid(const Vei2& screenPos);
 private:
-	static constexpr int width = 20;
-	static constexpr int height = 16;
+	static constexpr int width = 3;
+	static constexpr int height = 2;
 	Vei2 topLeft;
 	Tile field[width * height];
 	static constexpr int borderThickness = 10;

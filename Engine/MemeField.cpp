@@ -216,6 +216,19 @@ int MemeField::CountNeighborMemes(const Vei2& gridPos)
 	return count;
 }
 
+bool MemeField::GameIsWon() const
+{
+	for (const Tile& t : field)
+	{
+		if (t.HasMeme() && !t.isFlagged()
+			|| !t.HasMeme() && !t.isRevealed())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 MemeField::Tile& MemeField::TileAt(const Vei2& gridPos)
 {
 	return field[gridPos.y * width + gridPos.x];
