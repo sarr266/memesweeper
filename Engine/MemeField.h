@@ -4,6 +4,13 @@
 
 class MemeField
 {
+public:
+	enum class State
+	{
+		Playing,
+		Over,
+		Winner
+	};
 private:
 	class Tile
 	{
@@ -17,7 +24,7 @@ private:
 	public:
 		void SpawnMeme();
 		bool HasMeme() const;
-		void Draw(const Vei2& screenPos, bool isGameOver, Graphics& gfx) const; //position on screen in pixels, to draw Tiles
+		void Draw(const Vei2& screenPos, MemeField::State fieldState, Graphics& gfx) const; //position on screen in pixels, to draw Tiles
 		void Reveal();
 		bool isRevealed() const;
 		void ToggleFlag();
@@ -35,11 +42,12 @@ public:
 	void OnRevealClick(const Vei2& screenPos);
 	void OnFlagClick(const Vei2& screenPos);
 	int CountNeighborMemes(const Vei2& gridPos);
-	bool GameIsWon() const;
+	State GetState() const;
 private:
 	Tile& TileAt(const Vei2& gridPos); //position in tiles, called in non-const context
 	const Tile& TileAt(const Vei2& gridPos) const; //for const tilemaps, called in const context
 	Vei2 ScreenToGrid(const Vei2& screenPos);
+	bool GameIsWon() const;
 private:
 	static constexpr int width = 3;
 	static constexpr int height = 2;
@@ -47,5 +55,5 @@ private:
 	Tile field[width * height];
 	static constexpr int borderThickness = 10;
 	static constexpr Color borderColor = Colors::White;
-	bool isGameOver = false;
+	State state = State::Playing;
 };

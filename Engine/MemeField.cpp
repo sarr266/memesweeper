@@ -15,9 +15,9 @@ bool MemeField::Tile::HasMeme() const
 	return hasMeme;
 }
 
-void MemeField::Tile::Draw(const Vei2& screenPos, bool isGameOver, Graphics& gfx) const
+void MemeField::Tile::Draw(const Vei2& screenPos, MemeField::State fieldState, Graphics& gfx) const
 {
-	if (!isGameOver)
+	if (fieldState != MemeField::State::Over)
 	{
 		switch (state)
 		{
@@ -153,7 +153,7 @@ void MemeField::Draw(Graphics& gfx) const //const function, const TileAt version
 	{
 		for (gridPos.x = 0; gridPos.x < width; gridPos.x++)
 		{
-			TileAt(gridPos).Draw(topLeft + gridPos * SpriteCodex::tileSize, isGameOver, gfx);
+			TileAt(gridPos).Draw(topLeft + gridPos * SpriteCodex::tileSize, state, gfx);
 		}
 	}
 }
@@ -165,7 +165,7 @@ RectI MemeField::GetRect() const
 
 void MemeField::OnRevealClick(const Vei2& screenPos)
 {
-	if (!isGameOver)
+	if (state == State::Playing)
 	{
 		const Vei2 gridPos = ScreenToGrid(screenPos);
 		assert(gridPos.x >= 0 && gridPos.x < width&& gridPos.y >= 0 && gridPos.y < height);
@@ -175,7 +175,11 @@ void MemeField::OnRevealClick(const Vei2& screenPos)
 			tile.Reveal();
 			if (tile.HasMeme())
 			{
-				isGameOver = true;
+				state = State::Over;
+			}
+			else if (GameIsWon())
+			{
+				state = State::Winner; //couldnt we do an else here ?
 			}
 		}
 	}
@@ -183,14 +187,18 @@ void MemeField::OnRevealClick(const Vei2& screenPos)
 
 void MemeField::OnFlagClick(const Vei2& screenPos)
 {
-	if (!isGameOver)
+	if (state == State::Playing)
 	{
 		const Vei2 gridPos = ScreenToGrid(screenPos);
 		assert(gridPos.x >= 0 && gridPos.x < width&& gridPos.y >= 0 && gridPos.y < height);
 		Tile& tile = TileAt(gridPos);
-		if (!tile.isFlagged())
+		if (!tile.isRevealed())
 		{
 			tile.ToggleFlag();
+			if (tile.isFlagged() && GameIsWon())
+			{
+				state = State::Winner;
+			}
 		}
 	}
 }
@@ -227,6 +235,11 @@ bool MemeField::GameIsWon() const
 		}
 	}
 	return true;
+}
+
+MemeField::State MemeField::GetState() const
+{
+	return state;
 }
 
 MemeField::Tile& MemeField::TileAt(const Vei2& gridPos)
